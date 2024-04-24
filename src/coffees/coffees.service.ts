@@ -12,6 +12,13 @@ export class CoffeesService {
         }
     ]
 
+    private countId = 1;
+
+    genId (){
+        this.countId ++;
+        return this.countId;
+    }
+
     getAll(){
         if(this.coffees.length === 0){
             throw new NotFoundException(`No coffee found`)
@@ -28,7 +35,9 @@ export class CoffeesService {
     }
 
     create(createCoffeeDto: any){
-        return this.coffees.push(createCoffeeDto);
+        createCoffeeDto.id = this.genId()
+        this.coffees.push(createCoffeeDto);
+        return createCoffeeDto;
     }
 
     update(id: string, updateCoffeeDto: any){
