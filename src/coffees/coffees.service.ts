@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Query } from '@nestjs/common';
 import { Coffee } from './entities/coffee.entitie';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCoffeeDto } from './dto/create-coffee.dto';
 import { UpdateCoffeeDto } from './dto/update-coffee.dto';
 import { Flavor } from './entities/flavor.entitie';
+import { PaginationQueryDto } from 'src/common/dto/pagination.query.dto';
 
 @Injectable()
 export class CoffeesService {
@@ -15,9 +16,12 @@ export class CoffeesService {
         private readonly flavorRepository: Repository<Flavor>
     ){}
 
-    getAll(){
+    findAll(paginationQueryDto: PaginationQueryDto){
+        const {limit, offset} = paginationQueryDto;
         return this.coffeRepository.find({
-            relations: {flavors:true}
+            relations: {flavors:true},
+            skip: offset,
+            take: limit
         })
     }
 
@@ -63,12 +67,12 @@ export class CoffeesService {
         return this.coffeRepository.remove(coffee);
     }
 
-    private async preloadFlavorByName(name: string){
+    private async preloadFlavorByName(name: string): Promise<Flavor>{
         name = name.substring(0,1).toUpperCase() + name.substring(1, name.length).toLocaleLowerCase()
-        const flavor = await this.flavorRepository.findOne({where: {name:name}})
-        if(flavor){
-            return flavor
+        const existingFlavor = await this.flavorRepository.findOne({where: {name}})
+        if(existingFlavor){
+            return existingFlavor
         }
-        return this.flavorRepository.save({name})
+        return this.flavorRepository.create({name})
     }
 }
