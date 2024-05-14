@@ -33,4 +33,9 @@ export class CoffeesController {
     remove(@Param('id') id: number){
         return this.coffeesService.remove('' + id)
     }
+
+    @Post('/recommendCoffee')
+    recommendCoffee(@Body() body:any) {
+        return this.coffeesService.recommendCoffee(body.id)
+    }
 }
